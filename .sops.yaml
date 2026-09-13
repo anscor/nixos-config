@@ -1,0 +1,7 @@
+keys:
+  - &tencent age15sthh2kl3jkpltaq9kuufstjfkcxhh3de0v4nr2qrav4z8676qzq5tlr0n
+creation_rules:
+  - path_regex: secrets/secrets\.yaml$
+    key_groups:
+      - age:
+          - *tencent
