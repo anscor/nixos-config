@@ -33,6 +33,16 @@
           hm
         ];
       };
+
+      aiagent = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [
+          sops-nix.nixosModules.sops
+          ./hosts/aiagent/configuration.nix
+          home-manager.nixosModules.home-manager
+          hm
+        ];
+      };
     };
   };
 }
