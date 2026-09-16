@@ -17,7 +17,7 @@
     };
   };
 
-  outputs = inputs@{ nixpkgs, home-manager, sops-nix, ... }:
+  outputs = inputs@{ nixpkgs, home-manager, sops-nix, disko, ... }:
   let
     system = "x86_64-linux";
     hm = {
