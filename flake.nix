@@ -11,6 +11,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ nixpkgs, home-manager, sops-nix, ... }:
@@ -38,6 +42,7 @@
         inherit system;
         modules = [
           sops-nix.nixosModules.sops
+          disko.nixosModules.disko
           ./hosts/aiagent/configuration.nix
           home-manager.nixosModules.home-manager
           hm
