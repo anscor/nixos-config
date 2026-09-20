@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, sUsers, ... }:
 
 let
   appimage = pkgs.fetchurl {
@@ -31,10 +31,10 @@ let
   });
 in
 {
-  home-manager.users.anscor = {
+  home-manager.users = lib.genAttrs sUsers (user: {
     home.packages = [
       qq
       wechat
     ];
-  };
+  });
 }

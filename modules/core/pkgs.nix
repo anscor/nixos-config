@@ -1,4 +1,4 @@
-{ sLib, pkgs, ... }: {
+{ pkgs, ... }: {
   environment.systemPackages = with pkgs; [
     git
 

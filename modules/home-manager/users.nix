@@ -1,8 +1,5 @@
-{ lib, sLib, sUsers, ... }: let
-  getUserConfig = user: {
-    home-manager.users.${user} = { ... }: {
-      home.username = user;
-    };
-  };
-in
-  lib.mergeAttrsList (lib.map getUserConfig sUsers)
+{ lib, sUsers, ... }: {
+  home-manager.users = lib.genAttrs sUsers (user: { ... }: {
+    home.username = user;
+  });
+}

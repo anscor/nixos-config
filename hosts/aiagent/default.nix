@@ -2,6 +2,7 @@
   modules = [
     ./hardware-configuration.nix
     ./disk.nix
+    ./utils/vm.nix
 
     ({ ... }: {
       networking.hostName = "aiagent";

@@ -33,12 +33,12 @@
     system,
     modules ? [],
     specialArgs ? {},
-    moduleNames? [],
+    moduleNames ? [],
     ...
   }@attrs:
   builder {
     inherit system;
-    specialArgs = { inherit inputs sUsers; };
+    specialArgs = { inherit inputs sUsers; } // specialArgs;
     modules =
       (getCommonModules system)
       ++ modules
