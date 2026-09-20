@@ -1,4 +1,4 @@
-{ lib, pkgs, sUsers, ... }: let
+{ lib, pkgs, sUsers, config, ... }: let
   getUserConfig = user: {
     home = "/home/${user}";
     extraGroups = [ "wheel" ]; # Enable 'sudo' for the user.
