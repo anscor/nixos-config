@@ -22,7 +22,7 @@
     # ./modules/cli/system/monitor.nix
 
     sops-nix.nixosModules.sops
-    disko.nixosModule
+  ] ++ lib.attrValues disko.nixosModules ++ [
     home-manager.nixosModules.home-manager
 
     ./modules/home-manager
