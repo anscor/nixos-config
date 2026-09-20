@@ -1,8 +1,6 @@
 {
   self,
   nixpkgs,
-  nur,
-  nix-darwin,
   home-manager,
   sops-nix,
   ...
