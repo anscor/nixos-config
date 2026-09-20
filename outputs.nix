@@ -38,10 +38,7 @@
   }@attrs:
   builder {
     inherit system;
-    specialArgs =
-      { inherit inputs sUsers; }
-      // specialArgs
-      // { sLib = (sLib { inherit system; inherit lib; }); };
+    specialArgs = { inherit inputs sUsers; };
     modules =
       (getCommonModules system)
       ++ modules
