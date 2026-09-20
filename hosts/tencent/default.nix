@@ -1,7 +1,7 @@
 {
   modules = [
     ./hardware-configuration.nix
-    ./utils/vm.nix
+    ../utils/vm.nix
 
     ({ ... }: {
       networking.hostName = "tencent";
