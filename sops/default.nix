@@ -8,7 +8,9 @@
   sops.package = (inputs.sops-nix.packages.${pkgs.stdenv.hostPlatform.system}.sops-install-secrets).overrideAttrs (final: prev: {
     passthru = prev.passthru // {
       overrideModAttrs = lib.composeExtensions prev.passthru.overrideModAttrs (finalMod: prevMod: {
-        env = (prevMod.env or { }) // { GOPROXY = "https://goproxy.cn,direct"; };
+        preBuild = (prevMod.preBuild or "") + ''
+          export GOPROXY=https://goproxy.cn,direct
+        '';
       });
     };
   });
