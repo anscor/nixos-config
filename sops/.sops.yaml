@@ -2,7 +2,7 @@ keys:
   - &tencent age15sthh2kl3jkpltaq9kuufstjfkcxhh3de0v4nr2qrav4z8676qzq5tlr0n
   - &aiagent age187lfdh66jx5fgu2hcvz58jmjf8j8lzyysxrhz3zx4j0hly9w8p2qlfx8h3
 creation_rules:
-  - path_regex: secrets/secrets\.yaml$
+  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:
           - *tencent

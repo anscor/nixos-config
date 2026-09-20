@@ -27,10 +27,10 @@ let
   '';
 in
 {
-  # ===== xrdp：Windows mstsc 直连（LAN 3389）=====
-  services.xrdp.enable = true;
-  services.xrdp.defaultWindowManager = "xfce4-session";
-  services.xrdp.openFirewall = true;
+  services.xrdp = {
+    enable = true;
+    openFirewall = true;
+  };
 
   # ===== 剪贴板图片落地工具（每个图形会话自启一个，只读，互不干扰）=====
   environment.systemPackages = [ clipboard-image-drop ];
