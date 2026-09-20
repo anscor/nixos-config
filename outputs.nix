@@ -21,6 +21,7 @@
     # ./modules/cli/system/monitor.nix
 
     sops-nix.nixosModules.sops
+    disko.nixosModule
     home-manager.nixosModules.home-manager
 
     ./modules/home-manager
