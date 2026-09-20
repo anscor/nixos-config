@@ -3,6 +3,7 @@
   nixpkgs,
   home-manager,
   sops-nix,
+  disko,
   ...
 }@inputs: let
   lib = nixpkgs.lib;
