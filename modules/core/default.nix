@@ -4,6 +4,7 @@
     ./git.nix
     ./linux.nix
     ./env.nix
+    ./secrets.nix
   ];
 
   time.timeZone = "Asia/Shanghai";
