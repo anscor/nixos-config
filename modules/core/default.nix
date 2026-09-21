@@ -5,6 +5,7 @@
     ./linux.nix
     ./env.nix
     ./secrets.nix
+    ./ssh.nix
   ];
 
   time.timeZone = "Asia/Shanghai";
