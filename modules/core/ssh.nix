@@ -20,7 +20,7 @@ in {
   # GitHub host key 属系统级配置（home-manager 已不提供 programs.ssh.knownHosts）
   programs.ssh.knownHosts = {
     "github.com" = {
-      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
+      publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJC23p2vVcFasJVwv+ImsnWF1/XelwtTsOgMxbZP4gOJ";
     };
   };
 
@@ -32,7 +32,7 @@ in {
 
   users.users = lib.genAttrs sUsers (_: {
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEP4wRaJpuEFdmT6+/SpNjrBuqEbKTq9GkfoyttO1oHl anscor@AnscorPC"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKxnAwOamDQ2ZFkhIvL1DCz0UnMb0bkZHhRV8sukZnp0"
     ];
   });
 }
