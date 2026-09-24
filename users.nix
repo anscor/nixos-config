@@ -4,5 +4,6 @@
     extraGroups = [ "wheel" ]; # Enable 'sudo' for the user.
     isNormalUser = true;
     hashedPasswordFile = config.sops.secrets."shared/${user}_authkey".path;
+    linger = true;
   });
 }
