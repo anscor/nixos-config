@@ -1,8 +1,14 @@
-{ inputs, ... }: {
+{ inputs, paseoPackage, ... }: {
   imports = [ inputs.paseo.nixosModules.paseo ];
 
   services.paseo = {
     enable = true;
+
+    # 指向 outputs.nix 中定义的那个 derivation（与 CI 构建的 .#paseo 同一个）。
+    # 上游模块用 mkPackageOption（默认值 pkgs.paseo），flake 层用 mkDefault
+    # 覆盖为上游包；这里再显式覆盖为带修正 npmDepsHash 的版本，
+    # 否则目标机会走与 CI 不同的 derivation，导致缓存不命中而本地编译。
+    package = paseoPackage;
 
     # 以 anscor 身份运行：agent 进程需要访问该用户的 profile（pi / opencode / git）。
     # group 必须一起改，否则模块会额外创建一个无用的 paseo 组。
