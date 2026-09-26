@@ -36,8 +36,18 @@ jobs:
           # 与「只推 paseo 及其运行时闭包」的目标相反。改为下方手动精确推送。
           skipPush: true
 
+      # 注意：不能写成 `| tee 文件` —— GitHub Actions 的 run 默认是 bash -e 而
+      # 没有 pipefail，管道退出码只看 tee，会把 nix build 的失败静默掩盖成绿色成功。
+      # 这里用重定向 + 显式非空断言，让构建失败与空输出都立即报错。
       - name: Build paseo
-        run: nix build --no-link --print-out-paths .#paseo | tee "$RUNNER_TEMP/paseo-paths"
+        run: |
+          set -euo pipefail
+          nix build --no-link --print-out-paths .#paseo > "$RUNNER_TEMP/paseo-paths"
+          if [[ ! -s "$RUNNER_TEMP/paseo-paths" ]]; then
+            echo "::error::nix build 未输出任何 store path，构建实际未成功"
+            exit 1
+          fi
+          echo "built: $(cat "$RUNNER_TEMP/paseo-paths")"
 
       # 在入缓存前验证产物可运行，避免把启动不了的构建缓存进去
       - name: Smoke test daemon
