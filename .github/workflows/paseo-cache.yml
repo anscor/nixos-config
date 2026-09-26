@@ -1,0 +1,85 @@
+name: Build paseo cache
+
+# 把 paseo 构建并推入 Cachix，使 aiagent 上的 nixos-rebuild 直接替换而非本地编译。
+#
+# 设计要点见 docs/superpowers/specs/2026-09-25-paseo-nixos-deployment-design.md：
+#   - 只构建 .#paseo，不构建 nixosConfigurations（后者会拉入 sops 等无关求值依赖）
+#   - skipPush: true + 手动 cachix push，精确推送 paseo 及其运行时闭包
+#   - Cachix 会自动跳过 cache.nixos.org 已存在的路径，因此 nixpkgs 部分不占配额
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - flake.lock
+      - flake.nix
+      - outputs.nix
+      - .github/workflows/paseo-cache.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+
+      - uses: cachix/cachix-action@v17
+        with:
+          name: anscor-nixos-config
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+          # 关闭 daemon 模式：post-build hook 会无差别推送每个构建产物，
+          # 与「只推 paseo 及其运行时闭包」的目标相反。改为下方手动精确推送。
+          skipPush: true
+
+      - name: Build paseo
+        run: nix build --no-link --print-out-paths .#paseo | tee "$RUNNER_TEMP/paseo-paths"
+
+      # 在入缓存前验证产物可运行，避免把启动不了的构建缓存进去
+      - name: Smoke test daemon
+        run: |
+          set -euo pipefail
+
+          OUT="$(head -n1 "$RUNNER_TEMP/paseo-paths")"
+          export PASEO_HOME
+          PASEO_HOME="$(mktemp -d)"
+          export PASEO_LISTEN=127.0.0.1:6767
+
+          cleanup() {
+            if [[ -n "${DAEMON_PID:-}" ]] && kill -0 "$DAEMON_PID" 2>/dev/null; then
+              kill "$DAEMON_PID"
+              wait "$DAEMON_PID" || true
+            fi
+            rm -rf "$PASEO_HOME"
+          }
+          trap cleanup EXIT
+
+          PASEO_WEB_UI_ENABLED=true "$OUT/bin/paseo-server" --no-relay \
+            >"$PASEO_HOME/server.log" 2>&1 &
+          DAEMON_PID=$!
+
+          deadline=$((SECONDS + 60))
+          while (( SECONDS < deadline )); do
+            # /api/health 是免鉴权路由（见上游 auth.ts），因此无需配置密码
+            if curl -sf --max-time 3 http://127.0.0.1:6767/api/health >"$PASEO_HOME/health.json"; then
+              echo "daemon healthy: $(cat "$PASEO_HOME/health.json")"
+              exit 0
+            fi
+            if ! kill -0 "$DAEMON_PID" 2>/dev/null; then
+              echo "daemon exited before becoming healthy"
+              break
+            fi
+            sleep 1
+          done
+
+          echo "::group::server.log"
+          cat "$PASEO_HOME/server.log" 2>/dev/null || echo "<missing>"
+          echo "::endgroup::"
+          exit 1
+
+      - name: Push paseo closure
+        run: cachix push anscor-nixos-config < "$RUNNER_TEMP/paseo-paths"

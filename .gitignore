@@ -1,0 +1,10 @@
+# nix build 产生的符号链接（指向 /nix/store，提交无意义）
+result
+result-*
+
+# superpowers 技能的工作产物（方案 / 实现计划），不进配置仓库
+# 注意：只忽略 docs/superpowers/，docs/ 下其它文件（如 sops.md）仍受跟踪
+docs/superpowers/
+
+# direnv
+.direnv/

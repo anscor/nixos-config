@@ -13,5 +13,6 @@
   moduleNames = [
     "cli/ai"
     "cli/ai/pi/pi-web-ui.nix"
+    "cli/ai/paseo.nix"
   ];
 }

@@ -47,6 +47,16 @@
 
   mkNixos = path: mkSystem nixpkgs.lib.nixosSystem ({ system = "x86_64-linux"; } // import path);
 in {
+  # 供 CI（.#paseo）与 NixOS 模块指向同一个 derivation。
+  # 上游 nixosModules.paseo 内部用 lib.mkDefault 把 services.paseo.package
+  # 指向 paseo 自己 flake 的 packages.<system>.default，与此处是同一 derivation，
+  # 因此 CI 构建并推入 Cachix 的路径在目标机上必然命中。
+  packages = {
+    "x86_64-linux" = {
+      paseo = inputs.paseo.packages."x86_64-linux".default;
+    };
+  };
+
   nixosConfigurations."tencent"   = mkNixos ./hosts/tencent;
   nixosConfigurations."aiagent"   = mkNixos ./hosts/aiagent;
 }
