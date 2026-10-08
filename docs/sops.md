@@ -21,7 +21,7 @@ sops/
 ├── .sops.yaml                             # creation_rules：按路径决定收件人
 └── secrets/
     ├── shared/<name>                      # 所有机器都能解（如 anscor_authkey）
-    ├── hosts/<hostname>/<name>            # 只有该主机能解（如 pi_web_token）
+    ├── hosts/<hostname>/<name>            # 只有该主机能解
     └── users/<user>/<name>                # 属主为该用户（如 ssh_github）
 ```
 
@@ -30,7 +30,6 @@ sops/
 | 加密文件 | 落地路径 | owner |
 |---|---|---|
 | `secrets/shared/anscor_authkey` | `/run/secrets-for-users/anscor_authkey` | root |
-| `secrets/hosts/aiagent/pi_web_token` | `/run/secrets/hosts/aiagent/pi_web_token` | root |
 | `secrets/users/anscor/ssh_github` | `/run/secrets/users/anscor/ssh_github` | anscor |
 
 > `*_authkey` 结尾的文件会被特殊处理：`neededForUsers = true`，并且 PAM 路径拍平为
@@ -40,7 +39,6 @@ sops/
 
 ```
 sops/secrets/shared/anscor_authkey            2 收件人（tencent + aiagent）
-sops/secrets/hosts/aiagent/pi_web_token       1 收件人（仅 aiagent）
 sops/secrets/users/anscor/ssh_github          2 收件人（tencent + aiagent）
 ```
 
@@ -235,7 +233,6 @@ sudo nixos-rebuild switch --flake .#aiagent
 ```
 adding secret: shared/anscor_authkey
 removing secret: anscor_authkey
-adding rendered secret: pi-web-ui-anscor.env
 ```
 
 部署后验证：
@@ -247,9 +244,6 @@ ls -l /run/secrets/users/anscor/ssh_github           # -r-------- anscor users
 
 # 密码是否仍然有效（P=有效, L=锁定）
 sudo passwd -S anscor
-
-# 用户级服务是否读到 env
-systemctl --user status pi-web-ui --no-pager | head -5
 ```
 
 ### 8. 迁移旧的单文件 secrets.yaml
@@ -261,22 +255,18 @@ cd /home/anscor/nixos-config/sops
 export K=/var/lib/sops-nix/keys.txt
 OLD=secrets/secrets.yaml
 
-mkdir -p secrets/shared secrets/hosts/aiagent
+mkdir -p secrets/shared
 
 # 用重定向写入（不要用 $(...) 包裹，会丢末尾换行；binary 格式要求字节精确）
 sudo SOPS_AGE_KEY_FILE=$K sops -d --extract '["anscor_authkey"]' "$OLD" \
   | sudo tee secrets/shared/anscor_authkey >/dev/null
-sudo SOPS_AGE_KEY_FILE=$K sops -d --extract '["pi_web_token"]' "$OLD" \
-  | sudo tee secrets/hosts/aiagent/pi_web_token >/dev/null
 
 # 加密
 sudo SOPS_AGE_KEY_FILE=$K sops -e -i secrets/shared/anscor_authkey
-sudo SOPS_AGE_KEY_FILE=$K sops -e -i secrets/hosts/aiagent/pi_web_token
 sudo chown -R anscor:users secrets
 
 # 往返校验（密码哈希错一个字节就无法登录）
-for pair in "anscor_authkey:secrets/shared/anscor_authkey" \
-            "pi_web_token:secrets/hosts/aiagent/pi_web_token"; do
+for pair in "anscor_authkey:secrets/shared/anscor_authkey"; do
   key="${pair%%:*}"; f="${pair#*:}"
   a=$(sudo SOPS_AGE_KEY_FILE=$K sops -d --extract "[\"$key\"]" "$OLD")
   b=$(sudo SOPS_AGE_KEY_FILE=$K sops -d "$f")

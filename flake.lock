@@ -93,33 +93,12 @@
         "type": "github"
       }
     },
-    "pi-web-ui": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790059084,
-        "narHash": "sha256-vvBSIpxzj2D9JNOIJcP94s+NXdPaIyCiu+Z9aovz0tE=",
-        "owner": "Sion10032",
-        "repo": "pi-web-ui-nix",
-        "rev": "7e366c52b50084f41f9ec1cddcdb491540017d17",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Sion10032",
-        "repo": "pi-web-ui-nix",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "disko": "disko",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "paseo": "paseo",
-        "pi-web-ui": "pi-web-ui",
         "sops-nix": "sops-nix"
       }
     },
