@@ -13,5 +13,6 @@
   moduleNames = [
     "cli/ai"
     "cli/ai/paseo.nix"
+    "net/proxy.nix"
   ];
 }
