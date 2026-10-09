@@ -1,4 +1,8 @@
-{ inputs, paseoPackage, ... }: {
+{ inputs, paseoPackage, sUsers, lib, ... }: let
+  # 运行身份。用户名只在 outputs.nix 的 sUsers 里定义一次，不在此处硬编码；
+  # 与 modules/core/ssh.nix 用 lib.head sUsers 取主用户的写法一致。
+  paseoUser = lib.head sUsers;
+in {
   imports = [ inputs.paseo.nixosModules.paseo ];
 
   services.paseo = {
@@ -10,9 +14,11 @@
     # 否则目标机会走与 CI 不同的 derivation，导致缓存不命中而本地编译。
     package = paseoPackage;
 
-    # 以 anscor 身份运行：agent 进程需要访问该用户的 profile（pi / opencode / git）。
-    # group 必须一起改，否则模块会额外创建一个无用的 paseo 组。
-    user = "anscor";
+    # 运行身份来自 outputs.nix 的 sUsers：agent 进程需要访问该用户的
+    # profile（pi / opencode / git）。
+    # group 是 NixOS 固定组（gid 100），与用户名无关，无需参数化；
+    # 但必须与 user 一起显式设置，否则模块会额外创建一个无用的 paseo 组。
+    user = paseoUser;
     group = "users";
 
     # 绑 0.0.0.0 且仅 IPv4：

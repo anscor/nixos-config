@@ -1,4 +1,4 @@
-{ ... }: {
+{ sUsers, ... }: {
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
     substituters = [
@@ -19,7 +19,8 @@
       # 表现为静默不从缓存拉取而回退到本地编译。
       "anscor-nixos-config.cachix.org-1:oCBh5DqQc2l3skBpd0hIUuemvgVLzcA4kvJbA6Iaidw="
     ];
-    trusted-users = [ "root" "anscor" ];
+    # 取 outputs.nix 的 sUsers，避免用户名散落在各文件里
+    trusted-users = [ "root" ] ++ sUsers;
   };
   nixpkgs.config.allowUnfree = true;
 }
