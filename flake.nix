@@ -24,7 +24,7 @@
     # 是按它自身锁定的 nixpkgs rev 算出来的，跟随本仓库的 nixpkgs 可能导致
     # hash 不匹配，从而在目标机上触发本地重建，使缓存方案失效。
     paseo = {
-      url = "github:getpaseo/paseo/v0.9.2";
+      url = "github:getpaseo/paseo/v0.11.1";
     };
   };
   

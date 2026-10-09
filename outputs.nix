@@ -50,14 +50,19 @@
   # 单一定义，同时供 packages.paseo（CI 构建）与 services.paseo.package（目标机运行）
   # 使用。两处必须是同一个 derivation，否则目标机不会命中 CI 推入的缓存。
   #
-  # 为什么需要 override npmDepsHash：
-  # v0.9.2 tag 自带的 hash 是错的。上游在打 tag 之后才由它的 CI 自动修正该值，
-  # 而那个 Nix workflow 只监听 main、不监听 tag，因此修复没进 tag。
-  # 上游 nix/package.nix 专门为此暴露了 npmDepsHash 参数。
-  # 下面的值与上游修正提交 ea7a7418 一致，也与 CI 实际算出的 got 值一致。
-  paseoPackage = inputs.paseo.packages."x86_64-linux".default.override {
-    npmDepsHash = "sha256-UXnB6q5tubKpTs+A5+u/NLSzc8ZK6rAsQs+kEphEKd8=";
-  };
+  # 关于 npmDepsHash：
+  # v0.9.2 时 tag 自带的 hash 是错的，需要用 .override 覆盖成上游事后修正的值。
+  # v0.11.1 先直接用 tag 自带的 nix/npm-deps.hash（即不 override），由 CI 判定。
+  #
+  # 上游 nix/package.nix 为此保留了 npmDepsHash 参数，形如：
+  #   inputs.paseo.packages."x86_64-linux".default.override {
+  #     npmDepsHash = "sha256-...";
+  #   }
+  # 若 CI 报 "hash mismatch in fixed-output derivation"，把报错里的 got 值
+  # 按上面的形式填回来即可；注意该文件在 tag 后有被上游 CI 自动修正过
+  # （提交信息为 "fix: update lockfile signatures and Nix hash [skip ci]"），
+  # 因此 tag 值未必与 package-lock.json 一致。
+  paseoPackage = inputs.paseo.packages."x86_64-linux".default;
 in {
   # 供 CI 构建（.#paseo）。
   packages = {
