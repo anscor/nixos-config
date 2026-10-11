@@ -16,6 +16,14 @@ creation_rules:
           - *tencent
           - *aiagent
 
+  # 用户级：aiagent 只在跑 AI 工具的主机上存在
+  # （hosts/aiagent 通过 specialArgs 注入 aiUsers，tencent / wsl 都没有该用户），
+  # 故只列本机，与 secrets.nix 的 belongsHere 过滤一致。
+  - path_regex: secrets/users/aiagent/
+    key_groups:
+      - age:
+          - *aiagent
+
   # 主机隔离：只有该主机自己能解密
   - path_regex: secrets/hosts/aiagent/
     key_groups:
