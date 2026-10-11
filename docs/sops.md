@@ -336,6 +336,7 @@ ssh -T git@github.com     # 验证：Hi anscor! You've successfully authenticate
 | 部署后密码失效 | 密码哈希迁移出错 | 见第 8 节往返校验；保留一个 root 会话再改 |
 | `keyfile not found` 且 `generateKey = false` | 新机器上没有 age 私钥 | 从 Bitwarden 恢复 `keys.txt`（这是**期望行为**，不会静默生成） |
 | 服务读不到 secret（Permission denied） | 用户级 secret 但 `owner` 是 root | 路径放 `users/<user>/` 下（owner 自动为该用户） |
+| `sudo nixos-rebuild` 报 `repository path '...' is not owned by current user` | 仓库属主是提交者（非 root），Nix 的 git fetcher 拒绝读取 | 见 [`docs/rebuild.md`](rebuild.md) |
 
 ### 恢复 age 私钥（新机器 / 重装）
 

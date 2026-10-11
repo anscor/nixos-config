@@ -103,6 +103,8 @@ sudo nixos-rebuild switch --flake .#wsl
 
 > 首次会拉取本仓库锁定的 `nixpkgs` 与 `nixos-wsl`，耗时较长。
 > 之后每次改动都重复这一条 `nixos-rebuild switch --flake .#wsl`。
+> 若报 `repository path '...' is not owned by current user`：WSL 上的仓库属于克隆它的用户，
+> 而重建以 root 执行，需要先按 [`docs/rebuild.md`](rebuild.md) 加一条 `safe.directory`。
 
 ### 5. 验证
 
@@ -127,4 +129,5 @@ Windows 侧 `wsl --terminate NixOS` 后重进，默认用户才会切成 `anscor
 | 引导 / `boot.loader` 相关报错 | 误引入了 `hosts/utils/vm.nix` | 从 `hosts/wsl/default.nix` 的 `modules` 里移除 |
 | 网络不通 | WSL 侧 DNS / `dhcpcd` 冲突 | 不要启用 `networking.dhcpcd`；检查 Windows 侧 `.wslconfig` |
 | `Path '...' is not in the repository` | 新文件没 `git add` | flake 只可见被 git 跟踪的文件 |
+| `repository path '...' is not owned by current user` | 仓库属主是克隆它的用户，而重建以 root 执行 | 按 [`docs/rebuild.md`](rebuild.md) 加一条 `safe.directory` |
 | 需要走代理 | 默认不含 `net/proxy.nix` | 把 `192.168.31.70` 换成 WSL 可达的地址后，在 `hosts/wsl/default.nix` 的 `moduleNames` 里加 `"net/proxy.nix"` |
