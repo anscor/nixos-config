@@ -2,6 +2,7 @@
   lib,
   config,
   sUsers,
+  aiUsers,
   ...
 }: let
   # sops/secrets/ 下的分层结构由本模块自动发现，无需逐个声明：
@@ -29,10 +30,12 @@
   # 只接管本机相关的 secret：
   #   hosts/<其它主机>/ → 本机没有对应私钥，声明了会解密失败
   #   users/<其它用户>/ → 本机不存在该用户
+  # 注意这里要把 aiUsers 也算进去：AI 专用身份自己的 GitHub 凭据
+  # （users/<aiUser>/ssh_github）需要落在它自己名下。
   belongsHere = p:
     !(lib.hasPrefix "hosts/" p && !lib.hasPrefix "hosts/${host}/" p)
     && !(lib.hasPrefix "users/" p
-      && !builtins.elem (lib.elemAt (lib.splitString "/" p) 1) sUsers);
+      && !builtins.elem (lib.elemAt (lib.splitString "/" p) 1) (sUsers ++ aiUsers));
 
   isLayered = p:
     lib.hasPrefix "shared/" p

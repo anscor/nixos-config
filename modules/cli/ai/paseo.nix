@@ -1,9 +1,14 @@
-{ inputs, paseoPackage, sUsers, lib, ... }: let
-  # 运行身份。用户名只在 outputs.nix 的 sUsers 里定义一次，不在此处硬编码；
-  # 与 modules/core/ssh.nix 用 lib.head sUsers 取主用户的写法一致。
-  paseoUser = lib.head sUsers;
+{ inputs, paseoPackage, aiUsers, lib, ... }: let
+  # 运行身份：AI 专用用户（outputs.nix 的 aiUsers），不是管理员。
+  # 这样 paseo spawn 出来的 agent 进程不属于 wheel，读不到 /run/secrets 与 journal。
+  paseoUser = lib.head aiUsers;
 in {
   imports = [ inputs.paseo.nixosModules.paseo ];
+
+  # paseo 以此用户身份 spawn agent 进程（pi / opencode），它们会在
+  # ~/.pi/agent/ 下创建凭据文件；服务默认 umask 022 会留下 0644。
+  # 收紧到 077 → 新建文件为 0600（已存在的文件由 pi 模块的 activation chmod 修正）。
+  systemd.services.paseo.serviceConfig.UMask = "0077";
 
   services.paseo = {
     enable = true;

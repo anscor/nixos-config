@@ -10,6 +10,11 @@
 
   sUsers = [ "anscor" ];
 
+  # AI 专用身份：按主机指定，默认没有。
+  # 只有跑 AI 工具的主机通过 specialArgs 打开（见 hosts/aiagent/default.nix），
+  # 避免 tencent / wsl 上凭空多出一个用户。
+  aiUsers = [ ];
+
   getCommonModules = system: [
     ./nix-settings.nix
     ./users.nix
@@ -38,7 +43,7 @@
   }@attrs:
   builder {
     inherit system;
-    specialArgs = { inherit inputs sUsers paseoPackage; } // specialArgs;
+    specialArgs = { inherit inputs sUsers aiUsers paseoPackage; } // specialArgs;
     modules =
       (getCommonModules system)
       ++ modules
