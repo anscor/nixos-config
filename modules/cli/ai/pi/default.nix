@@ -25,6 +25,7 @@
             "npm:pi-zentui"
             "npm:pi-web-access"
             "npm:pi-commandcode-provider"
+            "npm:pi-clinepass-provider"
             "npm:@tintinweb/pi-tasks"
             "npm:@tintinweb/pi-subagents"
             "npm:@juicesharp/rpiv-ask-user-question"
