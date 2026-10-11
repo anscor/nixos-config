@@ -73,4 +73,5 @@ in {
 
   nixosConfigurations."tencent"   = mkNixos ./hosts/tencent;
   nixosConfigurations."aiagent"   = mkNixos ./hosts/aiagent;
+  nixosConfigurations."wsl"       = mkNixos ./hosts/wsl;
 }

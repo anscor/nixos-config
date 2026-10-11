@@ -19,6 +19,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # NixOS on WSL：提供 wsl.* 选项（如 wsl.enable / wsl.defaultUser）。
+    # 由 modules/wsl/default.nix 引入，只有 wsl 主机会加载，不影响实体机。
+    # 跟随本仓库 nixpkgs，避免整个 nixpkgs 被重复拉取与求值。
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # paseo：自托管 AI coding agent 总控台。
     # 刻意不写 inputs.nixpkgs.follows —— 上游 nix/package.nix 的 npmDepsHash
     # 是按它自身锁定的 nixpkgs rev 算出来的，跟随本仓库的 nixpkgs 可能导致
