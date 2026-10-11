@@ -27,6 +27,87 @@ hosts/wsl/default.nix          hostName = "wsl"、stateVersion，moduleNames = [
 
 ---
 
+## 磁盘布局（根盘 + 独立 `/home`）
+
+与实体机 aiagent 一样是「一份 root + 一份 home」，但 WSL 只能自建其中一块：
+
+| 盘 | 谁创建 | 位置怎么定 | 大小 |
+|---|---|---|---|
+| 根 `/` | WSL 自己（`ext4.vhdx`，单个 ext4，**无 GPT、无 `/boot`**） | `wsl --install --from-file .\nixos.wsl --location E:\WSL\NixOS`，或 `wsl --import NixOS E:\WSL\NixOS .\nixos.wsl --version 2` | 默认上限 1 TB、按需增长；要限上限用安装时的 `--vhd-size`（新版本，`wsl --install --help` 确认）或事后扩容 |
+| `/home` | 我们自建的 VHD | `E:\WSL\nixos-home.vhdx`，由 Windows 侧 `wsl --mount … --vhd --bare` 挂成块设备 | 创建时用 diskpart 的 `maximum=` 指定 |
+
+`/home` 独立的好处：`wsl --unregister` 后重新导入根盘时，**home 数据不受影响**。
+
+### 创建 home 盘（管理员 CMD / PowerShell）
+
+```
+diskpart
+create vdisk file="E:\WSL\nixos-home.vhdx" maximum=204800 type=expandable
+exit
+```
+
+`maximum` 单位是 MB（1024 进制），`204800` = 200 GiB；`type=expandable` 表示动态增长
+（文件随用随长，上限即 `maximum`）。Windows Pro/Enterprise 装了 Hyper-V 模块也可以用
+`New-VHD -Path E:\WSL\nixos-home.vhdx -SizeBytes 200GB -Dynamic`。
+
+### 挂载与首次格式化
+
+Windows 侧（**每次 WSL VM 重启后都要重做**，`wsl --mount` 不持久化；自动化见下）：
+
+```powershell
+wsl --mount E:\WSL\nixos-home.vhdx --vhd --bare
+```
+
+`--bare` 表示只挂上块设备、不自动 mount，留给 NixOS 侧按下面的声明去挂。
+Linux 侧首次格式化：
+
+```bash
+lsblk -o NAME,SIZE,FSTYPE        # 新盘通常是 /dev/sdb，但枚举顺序不保证
+sudo mkfs.ext4 -L nixos-home /dev/sdb
+```
+
+`hosts/wsl/default.nix` 里按 **label** 声明（不用 `/dev/sdX`）：
+
+```nix
+fileSystems."/home" = {
+  device = "/dev/disk/by-label/nixos-home";
+  fsType = "ext4";
+  options = [ "defaults" "nofail" "x-systemd.device-timeout=10" ];
+};
+```
+
+`nofail` + 较短的 `device-timeout`：盘没 attach 时不阻断启动。
+
+**开机自动 attach**：任务计划程序新建任务 → 触发器「登录时」→ 操作 `wsl.exe`，
+参数 `--mount E:\WSL\nixos-home.vhdx --vhd --bare`。
+
+若某次 `/home` 没挂上（例如 `wsl --shutdown` 之后直接开终端，没重跑 `wsl --mount`）：
+
+```bash
+# Windows 侧先 attach
+wsl --mount E:\WSL\nixos-home.vhdx --vhd --bare
+# Linux 侧再补挂（systemd 不会自动重试已失败的 mount unit）
+sudo systemctl start home.mount
+```
+
+### 顺带：关掉 swap 与换盘
+
+`%UserProfile%\.wslconfig`：
+
+```ini
+[wsl2]
+swap=0            # 官方语义：0 = 不建 swap 文件
+memory=16GB       # 关掉 swap 后建议显式给足，否则 nix 构建会被 OOM kill
+
+[experimental]
+sparseVhd=true    # 之后新建的 VHD 自动 sparse，删文件后空间能还给 Windows
+```
+
+swap 默认是内存的 25%（盘在 `%Temp%\swap.vhdx`）；改完 `wsl --shutdown` 生效。
+需要挂载额外的数据盘时：`wsl --mount <路径>.vhdx --vhd --bare` 会对**所有** WSL2 发行版可见。
+
+---
+
 ## 安装步骤
 
 ### 0. Windows 侧前置
