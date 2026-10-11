@@ -62,7 +62,7 @@ sops/secrets/users/anscor/ssh_github          2 收件人（tencent + aiagent）
 
 3. **别让 sops 管 `~/.ssh` 下的文件**
    sops-nix 会 `chown` secret 的每一级父目录为 `root:keys 0751`。若把私钥
-   `path` 设成 `/home/anscor/.ssh/id_ed25519`，`~/.ssh` 会变成 root 所有，之后
+   `path` 设成 `~/.ssh/id_ed25519`，`~/.ssh` 会变成 root 所有，之后
    `known_hosts`、`config` 都写不进去。
    → 正确做法：私钥留在 `/run/secrets/`，用 `identityFile` 指过去（见 ssh 部分）。
 
@@ -174,7 +174,7 @@ sudo cat /var/lib/sops-nix/keys.txt
 
 ```bash
 # ② 在【能解密目标文件的现有机器】上，把新公钥加入 .sops.yaml
-cd /home/anscor/nixos-config/sops
+cd /home/aiagent/nixos-config/sops
 $EDITOR .sops.yaml
 #   在 keys: 段加一行：  - &newhost age1xxx...
 #   在对应的 creation_rules 的 age 列表里加 *newhost
@@ -182,14 +182,14 @@ $EDITOR .sops.yaml
 
 ```bash
 # ③ 给所有已有文件补上新收件人（需要能解密它们）
-cd /home/anscor/nixos-config/sops
+cd /home/aiagent/nixos-config/sops
 find secrets -type f -exec \
   sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/keys.txt sops updatekeys -y {} \;
 ```
 
 ```bash
 # ④ 提交
-cd /home/anscor/nixos-config
+cd /home/aiagent/nixos-config
 git add sops/.sops.yaml sops/secrets
 git commit -m "新增 <hostname> 的 age 收件人"
 ```
@@ -251,7 +251,7 @@ sudo passwd -S anscor
 旧结构把所有秘密放在 `sops/secrets/secrets.yaml`（yaml，多键）。迁移到分层结构：
 
 ```bash
-cd /home/anscor/nixos-config/sops
+cd /home/aiagent/nixos-config/sops
 export K=/var/lib/sops-nix/keys.txt
 OLD=secrets/secrets.yaml
 
@@ -312,7 +312,7 @@ programs.ssh.settings."github.com" = {
 ssh-keygen -t ed25519 -C "anscor@aiagent" -f /tmp/k -N ''
 cat /tmp/k.pub        # 加到 GitHub → Settings → SSH and GPG keys
 
-cd /home/anscor/nixos-config/sops
+cd /home/aiagent/nixos-config/sops
 cp /tmp/k secrets/users/anscor/ssh_github
 sudo SOPS_AGE_KEY_FILE=/var/lib/sops-nix/keys.txt sops -e -i secrets/users/anscor/ssh_github
 sudo chown anscor:users secrets/users/anscor/ssh_github
