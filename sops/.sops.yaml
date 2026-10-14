@@ -1,20 +1,23 @@
 keys:
   - &tencent age15sthh2kl3jkpltaq9kuufstjfkcxhh3de0v4nr2qrav4z8676qzq5tlr0n
   - &aiagent age187lfdh66jx5fgu2hcvz58jmjf8j8lzyysxrhz3zx4j0hly9w8p2qlfx8h3
+  - &wsl age1suaa9x0wzq48z7ludtrhm4zwvml03p37gatv8xstfxs0v567nv6qn54ljm
 creation_rules:
-  # 共享：两台机器都能解密（如 anscor_authkey）
+  # 共享：三台机器都能解密（如 anscor_authkey）
   - path_regex: secrets/shared/
     key_groups:
       - age:
           - *tencent
           - *aiagent
+          - *wsl
 
-  # 用户级：两台机器上都存在的用户
+  # 用户级：三台机器上都存在的用户
   - path_regex: secrets/users/anscor/
     key_groups:
       - age:
           - *tencent
           - *aiagent
+          - *wsl
 
   # 用户级：aiagent 只在跑 AI 工具的主机上存在
   # （hosts/aiagent 通过 specialArgs 注入 aiUsers，tencent / wsl 都没有该用户），
@@ -25,6 +28,7 @@ creation_rules:
           - *aiagent
 
   # 主机隔离：只有该主机自己能解密
+  # （wsl 目前没有专属秘密；将来加 secrets/hosts/wsl/ 时在这里补一条）
   - path_regex: secrets/hosts/aiagent/
     key_groups:
       - age:
