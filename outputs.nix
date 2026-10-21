@@ -56,17 +56,19 @@
   # 使用。两处必须是同一个 derivation，否则目标机不会命中 CI 推入的缓存。
   #
   # 关于 npmDepsHash：
-  # v0.11.1 tag 自带的 nix/npm-deps.hash 又是过期的（与 v0.9.2 同一个坑）。
+  # v0.12.0 tag 自带的 nix/npm-deps.hash 依然是过期的（与 v0.9.2 / v0.11.1 同一个坑）。
   # 上游在打 tag 后由它自己的 CI 自动修正该值，而那条 workflow 不监听 tag，
   # 所以修复没进 tag。因此仍需用 .override 覆盖。
   #
-  # 下面的值与上游修正提交 33eb36c0 及当前 main 一致：
-  #   sha256-aoYgGgEkqeeZJR7OOcSHuZEhBELkpyOGqHo4oEx7W88=
-  # 已核对 33eb36c0 只改了 nix/npm-deps.hash，未动 package-lock.json
-  # （两者该文件的 blob sha 均为 8d2be2f9，1524858 字节），故该值适用于
-  # v0.11.1 的源码树。tag 自带的过期值为 sha256-AKY6OMZg…。
+  # 下面的值来自上游修正提交 9a0b95aa10（“fix: update lockfile signatures and
+  # Nix hash”，tag 发布后 2 分钟）：
+  #   sha256-ObBdUmNSW+vDjzA7EbCDfZrB0nYDmcWmWe+UCoTMh/M=
+  # 已核对 9a0b95aa10 只改了 nix/npm-deps.hash，未动 package-lock.json
+  # （该提交与 v0.12.0 tag 的 package-lock.json blob sha 同为 81248c6c，
+  # 1523782 字节），故该值适用于 v0.12.0 的源码树。
+  # tag 自带的过期值为 sha256-tSE4nb4E…。
   paseoPackage = inputs.paseo.packages."x86_64-linux".default.override {
-    npmDepsHash = "sha256-aoYgGgEkqeeZJR7OOcSHuZEhBELkpyOGqHo4oEx7W88=";
+    npmDepsHash = "sha256-ObBdUmNSW+vDjzA7EbCDfZrB0nYDmcWmWe+UCoTMh/M=";
   };
 in {
   # 供 CI 构建（.#paseo）。
